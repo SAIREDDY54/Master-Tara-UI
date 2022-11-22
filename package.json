@@ -1,0 +1,50 @@
+{
+  "name": "react",
+  "version": "1.0.0",
+  "description": "React example starter project",
+  "keywords": [
+    "react",
+    "starter"
+  ],
+  "main": "src/index.js",
+  "dependencies": {
+    "@emotion/react": "11.10.5",
+    "@emotion/styled": "11.10.5",
+    "@mui/material": "5.10.12",
+    "axios": "^1.1.3",
+    "bs-custom-file-input": "^1.3.4",
+    "concurrently": "^7.5.0",
+    "connect-timeout": "^1.9.0",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "nodemon": "^2.0.20",
+    "notistack": "^2.0.8",
+    "python-shell": "^3.0.1",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "react-excel-renderer": "^1.1.0",
+    "react-full-screen": "^1.1.1",
+    "react-fullscreen-crossbrowser": "^1.1.0",
+    "react-lottie": "^1.2.3",
+    "react-scripts": "4.0.0",
+    "screenfull": "^6.0.2"
+  },
+  "devDependencies": {
+    "@babel/runtime": "7.13.8",
+    "filepath": "^1.1.0",
+    "typescript": "4.1.3"
+  },
+  "scripts": {
+    "start": "react-scripts --openssl-legacy-provider start",
+    "build": "react-scripts --openssl-legacy-provider build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject",
+    "dev": "concurrently \"react-scripts --openssl-legacy-provider start\" \"node server/app.js\""
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ]
+}
