@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 import Lottie from 'react-lottie';
 import successData from './lottie/success';
@@ -16,6 +16,7 @@ import Backdrop from "@mui/material/Backdrop";
 import Paper from "@mui/material/Paper";
 import Axios from "axios";
 import BOSCH from "../src/img/bosch.png";
+import { io } from "socket.io-client";
 
 import {
   Button,
@@ -84,6 +85,21 @@ export default function Main() {
   const timerRef = React.useRef();
   const inputRef = React.useRef(null);
   const backDrop = React.useRef(null);
+  const [messages, setMessages] = React.useState([])
+
+  let socket;
+
+  useEffect(() => {
+    socket = io('http://localhost:5000');
+    // socket.on('connect', ()=>console.log(socket.id))
+    // socket.on("message", (data) => {
+    //   // socket.emit("interfaces", { user: "user.username", msg: "chatInput" });
+    //   // console.log(JSON.stringify(json))
+    //   console.log(data)
+      
+    // });
+
+  })
 
   const successDefault = {
     loop: true,
@@ -111,15 +127,24 @@ export default function Main() {
     timerRef.current = window.setTimeout(() => {
       setDrop(false);
       if (!drop.valueOf()) {
-        Axios.get('http://localhost:5000/checkStatus')
-          .then(res => setData(res.data))
+        // Axios.get('http://localhost:5000/checkStatus')
+        //   .then(res => setData(res.data))
+        // socket.emit("status", )
+        socket.on('checkStatus', (status) => {
+          setData(status)
+        })
         setSuccessDialog(true);
       }
+      // Axios.post("http://localhost:5000", {
+      //   "interfaces": interfaces
+      // }, { headers: { 'Content-Type': 'application/json' } })
+      socket.emit("interfaces", interfaces)
+
     }, 3000);
 
-    Axios.post("http://localhost:5000/interfaces", {
-      "interfaces": interfaces
-    }, { headers: { 'Content-Type': 'application/json' } })
+    // Axios.post("http://localhost:5000/interfaces", {
+    //   "interfaces": interfaces
+    // }, { headers: { 'Content-Type': 'application/json' } })
   }
   const handleClickOpenDialog = () => {
     setOpenDialog(true);
@@ -151,27 +176,24 @@ export default function Main() {
     setInterfaces([]);
   }
 
-  const changeHandler = (event) => {
+  // const changeHandler = (event) => {
 
-    const files = event.target.files
-    let file;
+  //   const files = event.target.files
+  //   let file;
 
-    for (let i = 0; i < files.length; i++) {
-      file = files.item(i);
-      console.log(file.name)
-      setFile(file.name)
-      Axios.post("http://localhost:5000/filePath", {
-        "filePath": file.name
-      }, { headers: { 'Content-Type': 'application/json' } })
-    }
-    // resetName(event);
-    console.log(event.target.value);
-  };
+  //   for (let i = 0; i < files.length; i++) {
+  //     file = files.item(i);
+  //     console.log(file.name)
+  //     setFile(file.name)
+  //     socket.emit("filepath", file.name)
+  //   }
+  //   console.log(event.target.value);
+  // };
 
-  const resetFileInput = () => {
-    // 👇️ reset input value
-    inputRef.current.value = null;
-  };
+  // const resetFileInput = () => {
+  //   // ðŸ‘‡ï¸ reset input value
+  //   inputRef.current.value = null;
+  // };
 
   return (
     <div
@@ -218,11 +240,11 @@ export default function Main() {
             </Select>
 
           </FormControl>
-          <div style={{ marginTop: "20px", marginBottom: "20px", alignItems: "center" }}>
+          {/* <div style={{ marginTop: "20px", marginBottom: "20px", alignItems: "center" }}>
             {interfaces.length <= 0 ? <p>Select TARA Template Path: <input type="file" style={{color:"transparent", width:"70px"}} onChange={changeHandler} multiple disabled={true} /></p> : <p>Select TARA Template Path: <input style={{color:"transparent", width:"70px"}} ref={inputRef} type="file" onChange={changeHandler} multiple /></p>}
-          </div>
+          </div> */}
           <Button
-            disabled={interfaces.length <= 0 || file.length == 0}
+            disabled={interfaces.length <= 0}
             variant="contained"
             onClick={()=>{handleClickOpenDialog()}}
           >
@@ -315,7 +337,7 @@ export default function Main() {
               handleCloseSuccessDialog();
               setInterfaces([]);
               setFile([])
-              resetFileInput();
+              // resetFileInput();
             }}
           >
             OK
