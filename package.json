@@ -6,41 +6,49 @@
     "react",
     "starter"
   ],
-  "main": "src/index.js",
+  "main": "public/electron.js",
+  "homepage": "./",
   "dependencies": {
     "@emotion/react": "11.10.5",
     "@emotion/styled": "11.10.5",
+    "@material-ui/styles": "^4.11.5",
     "@mui/material": "5.10.12",
+    "@mui/styles": "^5.11.2",
     "axios": "^1.1.3",
-    "bs-custom-file-input": "^1.3.4",
+    "bootstrap": "^5.2.3",
     "concurrently": "^7.5.0",
     "connect-timeout": "^1.9.0",
     "cors": "^2.8.5",
+    "cross-env": "^7.0.3",
+    "electron-is-dev": "^2.0.0",
     "express": "^4.18.2",
     "nodemon": "^2.0.20",
-    "notistack": "^2.0.8",
-    "python-shell": "^3.0.1",
+    "random-key-generator": "^1.2.3",
     "react": "18.2.0",
+    "react-bootstrap": "^2.7.0",
     "react-dom": "18.2.0",
-    "react-excel-renderer": "^1.1.0",
-    "react-full-screen": "^1.1.1",
-    "react-fullscreen-crossbrowser": "^1.1.0",
     "react-lottie": "^1.2.3",
     "react-scripts": "4.0.0",
-    "screenfull": "^6.0.2",
-    "socket.io-client": "^4.5.4"
+    "wait-on": "^7.0.1"
   },
+  
   "devDependencies": {
     "@babel/runtime": "7.13.8",
+    "electron": "^22.0.0",
+    "electron-builder": "^23.6.0",
+    "electron-packager": "^17.1.1",
     "filepath": "^1.1.0",
     "typescript": "4.1.3"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
+    "start": "react-scripts --openssl-legacy-provider start",
     "test": "react-scripts test --env=jsdom",
+    "build": "react-scripts build",
     "eject": "react-scripts eject",
-    "dev": "concurrently \"react-scripts --openssl-legacy-provider start\" \"node server/app.js\""
+    "dev": "concurrently \"react-scripts --openssl-legacy-provider start\" \"node server/app.js\"",
+    "electron-build": "electron-builder",
+    "release": "npm run react-build && electron-builder --publish=always",
+    "package-win": "electron-packager . electron-tutorial-app --overwrite --asar=true --platform=win32 --arch=x64 --prune=true --out=release-builds --version-string.CompanyName=CE --version-string.FileDescription=CE --version-string.ProductName=\"Electron Tutorial App\""
   },
   "browserslist": [
     ">0.2%",

@@ -16,7 +16,8 @@ import Backdrop from "@mui/material/Backdrop";
 import Paper from "@mui/material/Paper";
 import Axios from "axios";
 import BOSCH from "../src/img/bosch.png";
-import { io } from "socket.io-client";
+import random from 'random-key-generator';
+
 
 import {
   Button,
@@ -25,8 +26,11 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  Grid,
   Stack,
 } from "@mui/material";
+
+
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -65,7 +69,8 @@ function getStyles(name, interfaces, theme) {
 export default function Main() {
   const theme = useTheme();
   const [interfaces, setInterfaces] = React.useState([]);
-  const [file, setFile] = React.useState([])
+  // const classes = useStyles();
+
 
   const handleChange = (event) => {
     const {
@@ -75,6 +80,7 @@ export default function Main() {
       // On autofill we get a stringified value.
       typeof value === "string" ? value.split(",") : value
     );
+
   };
 
   const [openDialog, setOpenDialog] = React.useState(false);
@@ -82,24 +88,33 @@ export default function Main() {
   const [successDialog, setSuccessDialog] = React.useState(false);
   const [drop, setDrop] = React.useState(false);
   const [data, setData] = React.useState(null);
-  const timerRef = React.useRef();
-  const inputRef = React.useRef(null);
-  const backDrop = React.useRef(null);
-  const [messages, setMessages] = React.useState([])
 
-  let socket;
 
-  useEffect(() => {
-    socket = io('http://localhost:5000');
-    // socket.on('connect', ()=>console.log(socket.id))
-    // socket.on("message", (data) => {
-    //   // socket.emit("interfaces", { user: "user.username", msg: "chatInput" });
-    //   // console.log(JSON.stringify(json))
-    //   console.log(data)
-      
-    // });
 
-  })
+
+  // useEffect(() => {
+  //   return () => {
+  //     Axios.get('http://localhost:8080/checkStatus')
+  //       .then(
+  //         res => {
+
+  //           console.log(res.data)
+  //           if (res.data === "Completed") {
+  //             setSuccessDialog(true)
+  //             console.log("completed")
+  //             setDrop(false)
+  //             alert("completed")
+  //           }
+  //           else if (res.data === "processing") {
+  //             setDrop(!drop)
+  //             console.log("processed")
+  //           }
+  //           setData(res.data)
+
+  //           console.log(sessionStorage.getItem("sessionId"))
+  //         })
+  //   }
+  // }, [data])
 
   const successDefault = {
     loop: true,
@@ -119,45 +134,40 @@ export default function Main() {
     }
   };
 
-  function handleOpen(interfaces) {
-    setDrop(!drop);
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-    }
-    timerRef.current = window.setTimeout(() => {
-      setDrop(false);
-      if (!drop.valueOf()) {
-        // Axios.get('http://localhost:5000/checkStatus')
-        //   .then(res => setData(res.data))
-        // socket.emit("status", )
-        socket.on('checkStatus', (status) => {
-          setData(status)
-        })
-        setSuccessDialog(true);
-      }
-      // Axios.post("http://localhost:5000", {
-      //   "interfaces": interfaces
-      // }, { headers: { 'Content-Type': 'application/json' } })
-      socket.emit("interfaces", interfaces)
+  function handleOpen() {
+    Axios.post("https://tara-api.onrender.com/interfaces", {
+      "interfaces": interfaces,
+      "sessionId": random.getRandom(20, 'TARA', '@', 'front')
+    }, { headers: { 'Content-Type': 'application/json' } })
+    sessionStorage.setItem("sessionId", "Hello")
 
-    }, 3000);
+    setDrop(true)
 
-    // Axios.post("http://localhost:5000/interfaces", {
-    //   "interfaces": interfaces
-    // }, { headers: { 'Content-Type': 'application/json' } })
+    var timer = setInterval(function () {
+      getStatus(timer)
+    }, 1000);
+
+
+
   }
+
+  function getStatus(timer) {
+    Axios.get('https://tara-api.onrender.com/checkStatus')
+      .then(
+        res => {
+          if (res.data === "Completed") {
+            setSuccessDialog(true)
+            console.log("completed")
+            setDrop(false)
+            clearInterval(timer)
+            setData(res.data)
+          }
+        })
+  }
+
   const handleClickOpenDialog = () => {
     setOpenDialog(true);
-    
-
   };
-
-  // async function py(){
-  //   let pyodide = await loadPyodide();
-  //   console.log(pyodide.runPython(`
-  //   python db_access.py
-  // `));
-  // }
 
   const handleCloseDialog = () => {
     setOpenDialog(false);
@@ -176,83 +186,52 @@ export default function Main() {
     setInterfaces([]);
   }
 
-  // const changeHandler = (event) => {
-
-  //   const files = event.target.files
-  //   let file;
-
-  //   for (let i = 0; i < files.length; i++) {
-  //     file = files.item(i);
-  //     console.log(file.name)
-  //     setFile(file.name)
-  //     socket.emit("filepath", file.name)
-  //   }
-  //   console.log(event.target.value);
-  // };
-
-  // const resetFileInput = () => {
-  //   // ðŸ‘‡ï¸ reset input value
-  //   inputRef.current.value = null;
-  // };
-
   return (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        minHeight: "100vh",
-      }}
-    >
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
       <AppBar position="fixed">
         <Toolbar>
-          <div style={{ width: "100vw", alignItems: "center" }}>
-            <h3 style={{ float: "left", marginTop: "25px" }}>TARA Master Sheet Creator</h3>
-            <img src={BOSCH} style={{ maxHeight: "70px", maxWidth: "50%", float: "right" }} />
-          </div>
+          <h3 style={{ float: "left" }}>TARA Master Sheet Creator</h3>
+           
+          
         </Toolbar>
       </AppBar>
+
       <Stack direction="column" alignItems="center">
-        <Stack direction="column" alignItems="center" display="flex">
-          <FormControl sx={{ m: 1, width: 300 }}>
-            <InputLabel id="demo-multiple-name-label">
-              Select Interfaces and Protocols
-            </InputLabel>
-            <Select
-              style={{ zIndex: 3 }}
-              labelId="demo-multiple-name-label"
-              id="demo-multiple-name"
-              multiple
-              value={interfaces}
-              onChange={handleChange}
-              input={<OutlinedInput label="Select Interfaces and Protocols" />}
-              MenuProps={MenuProps}
-            >
-              {items.map((name) => (
-                <MenuItem
-                  key={name}
-                  value={name}
-                  style={getStyles(name, interfaces, theme)}
-                >
-                  {name}
-                </MenuItem>
-              ))}
-            </Select>
-
-          </FormControl>
-          {/* <div style={{ marginTop: "20px", marginBottom: "20px", alignItems: "center" }}>
-            {interfaces.length <= 0 ? <p>Select TARA Template Path: <input type="file" style={{color:"transparent", width:"70px"}} onChange={changeHandler} multiple disabled={true} /></p> : <p>Select TARA Template Path: <input style={{color:"transparent", width:"70px"}} ref={inputRef} type="file" onChange={changeHandler} multiple /></p>}
-          </div> */}
-          <Button
-            disabled={interfaces.length <= 0}
-            variant="contained"
-            onClick={()=>{handleClickOpenDialog()}}
+        <FormControl sx={{ m: 1, width: 300 }}>
+          <InputLabel id="demo-multiple-name-label">
+            Select Interfaces and Protocols
+          </InputLabel>
+          <Select
+            style={{ zIndex: 2 }}
+            labelId="demo-multiple-name-label"
+            id="demo-multiple-name"
+            multiple
+            value={interfaces}
+            onChange={handleChange}
+            input={<OutlinedInput label="Select Interfaces and Protocols" />}
+            MenuProps={MenuProps}
           >
-            Generate TARA
-          </Button>
-        </Stack>
+            {items.map((name) => (
+              <MenuItem
+                key={name}
+                value={name}
+                style={getStyles(name, interfaces, theme)}
+              >
+                {name}
+              </MenuItem>
+            ))}
+          </Select>
 
+        </FormControl>
+        <Button
+          disabled={interfaces.length <= 0}
+          variant="contained"
+          onClick={() => { handleClickOpenDialog() }}
+        >
+          Generate TARA
+        </Button>
       </Stack>
+      {/* {data ? data : "loading"} */}
 
       <Dialog
         open={openDialog}
@@ -260,6 +239,7 @@ export default function Main() {
         fullWidth
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
+        disableEscapeKeyDown
       >
         <DialogTitle id="alert-dialog-title">
           {"TARA Sheet Will be Generated for"}
@@ -285,8 +265,7 @@ export default function Main() {
           <Button
             onClick={() => {
               handleCloseDialog();
-              // setInterfaces([]);
-              handleOpen(interfaces);
+              handleOpen();
 
             }}
             autoFocus
@@ -302,6 +281,7 @@ export default function Main() {
         fullWidth
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
+        disableEscapeKeyDown
       >
         <DialogTitle id="alert-dialog-title">
           {"Operation Aborted!"}
@@ -324,19 +304,19 @@ export default function Main() {
         fullWidth
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
+        disableEscapeKeyDown
       >
         <DialogTitle id="alert-dialog-title">
-          {data === "SUCCESS" ? `Tara Sheet Created for ${interfaces.join(", ")}` : "Tara Sheet Cannot be created"}
+          {data === "Completed" ? `Tara Sheet Created for ${interfaces.join(", ")}` : `Tara Sheet Cannot be Created for ${interfaces.join(", ")}`}
         </DialogTitle>
         <DialogContent>
-          {data === "SUCCESS" ? <Lottie options={successDefault} height={200} width={200} /> : <Lottie options={failedDefault} height={200} width={200} />}
+          {data === "Completed" ? <Lottie options={successDefault} height={200} width={200} /> : <Lottie options={failedDefault} height={200} width={200} />}
         </DialogContent>
         <DialogActions>
           <Button
             onClick={() => {
               handleCloseSuccessDialog();
               setInterfaces([]);
-              setFile([])
               // resetFileInput();
             }}
           >
@@ -345,20 +325,17 @@ export default function Main() {
         </DialogActions>
       </Dialog>
 
-      <div>
-        <Backdrop
-          sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
-          open={drop}
-          ref={backDrop}
-        >
-          <Stack direction="column" alignItems="center" display="absolute">
-            <CircularProgress color="inherit" />
-            <div style={{ marginTop: "15px" }}>
-              TARA Sheet Creating Please Wait....
-            </div>
-          </Stack>
-        </Backdrop>
-      </div>
+      <Backdrop
+        sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={drop}
+      >
+        <Stack direction="column" alignItems="center" display="absolute" >
+          <CircularProgress style={{ color: "white" }} />
+          <div className="circular-text" style={{ marginTop: "15px", color: "white" }}>
+            TARA Sheet is Being Created Please Wait....
+          </div>
+        </Stack>
+      </Backdrop>
 
       <Paper
         sx={{
@@ -370,7 +347,8 @@ export default function Main() {
           backgroundColor: "#1976d2",
         }}
         elevation={3}
-      ></Paper>
-    </div>
+      ><img src={BOSCH} style={{ height: "50px", maxWidth: "50%", float: "right", marginRight: "10px", marginTop: "5px" }} /></Paper>
+    </div >
+
   );
 }
