@@ -135,7 +135,7 @@ export default function Main() {
   };
 
   function handleOpen() {
-    Axios.post("https://tara-api.onrender.com/interfaces", {
+    Axios.post("http://localhost:8080/interfaces", {
       "interfaces": interfaces,
       "sessionId": random.getRandom(20, 'TARA', '@', 'front')
     }, { headers: { 'Content-Type': 'application/json' } })
@@ -152,7 +152,7 @@ export default function Main() {
   }
 
   function getStatus(timer) {
-    Axios.get('https://tara-api.onrender.com/checkStatus')
+    Axios.get('http://localhost:8080/checkStatus')
       .then(
         res => {
           if (res.data === "Completed") {
