@@ -141,7 +141,7 @@ export default function Main() {
     }, { headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } })
     sessionStorage.setItem("sessionId", "Hello")
 
-    // setDrop(true)
+    setDrop(true)
 
     var timer = setInterval(function () {
       getStatus(timer)
