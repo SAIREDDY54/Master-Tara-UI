@@ -92,29 +92,28 @@ export default function Main() {
 
 
 
-  // useEffect(() => {
-  //   return () => {
-  //     Axios.get('http://localhost:8080/checkStatus')
-  //       .then(
-  //         res => {
+  useEffect(() => {
+    return () => {
+      Axios.get('http://localhost:8080/checkStatus')
+        .then(
+          res => {
 
-  //           console.log(res.data)
-  //           if (res.data === "Completed") {
-  //             setSuccessDialog(true)
-  //             console.log("completed")
-  //             setDrop(false)
-  //             alert("completed")
-  //           }
-  //           else if (res.data === "processing") {
-  //             setDrop(!drop)
-  //             console.log("processed")
-  //           }
-  //           setData(res.data)
+            console.log(res.data)
+            if (res.data === "Completed") {
+              setSuccessDialog(true)
+              console.log("completed")
+              setDrop(false)
+            }
+            else if (res.data === "processing") {
+              setDrop(!drop)
+              console.log("processed")
+            }
+            setData(res.data)
 
-  //           console.log(sessionStorage.getItem("sessionId"))
-  //         })
-  //   }
-  // }, [data])
+            console.log(sessionStorage.getItem("sessionId"))
+          })
+    }
+  }, [data])
 
   const successDefault = {
     loop: true,
@@ -138,32 +137,32 @@ export default function Main() {
     Axios.post("http://localhost:8080/interfaces", {
       "interfaces": interfaces,
       "sessionId": random.getRandom(20, 'TARA', '@', 'front')
-    }, { headers: { 'Content-Type': 'application/json' } })
+    }, { headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } })
     sessionStorage.setItem("sessionId", "Hello")
 
-    setDrop(true)
+    // setDrop(true)
 
-    var timer = setInterval(function () {
-      getStatus(timer)
-    }, 1000);
+    // var timer = setInterval(function () {
+    //   getStatus(timer)
+    // }, 1000);
 
 
 
   }
 
-  function getStatus(timer) {
-    Axios.get('http://localhost:8080/checkStatus')
-      .then(
-        res => {
-          if (res.data === "Completed") {
-            setSuccessDialog(true)
-            console.log("completed")
-            setDrop(false)
-            clearInterval(timer)
-            setData(res.data)
-          }
-        })
-  }
+  // function getStatus(timer) {
+  //   Axios.get('http://localhost:8080/checkStatus')
+  //     .then(
+  //       res => {
+  //         if (res.data === "Completed") {
+  //           setSuccessDialog(true)
+  //           console.log("completed")
+  //           setDrop(false)
+  //           clearInterval(timer)
+  //           setData(res.data)
+  //         }
+  //       })
+  // }
 
   const handleClickOpenDialog = () => {
     setOpenDialog(true);
