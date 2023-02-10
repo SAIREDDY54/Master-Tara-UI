@@ -16,8 +16,10 @@ import Backdrop from "@mui/material/Backdrop";
 import Paper from "@mui/material/Paper";
 import Axios from "axios";
 import BOSCH from "../src/img/bosch.png";
+import TALE from "../src/img/talebg.png"
 import random from 'random-key-generator';
-
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Checkbox from '@mui/material/Checkbox';
 
 import {
   Button,
@@ -26,7 +28,7 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-  Grid,
+  ListItemText,
   Stack,
 } from "@mui/material";
 
@@ -45,16 +47,29 @@ const MenuProps = {
 };
 
 const items = [
-  "Bluetooth",
   "USB",
   "BLE",
-  "Lora",
-  "CAN",
-  "RF",
-  "3G",
-  "GSM",
-  "5G",
-  "UART",
+  "JTag",
+  "WIFI"
+];
+
+const aws_assets = [
+  "S3",
+  "EC2",
+  "DATALAKE",
+  "Beanstalk"
+];
+
+const azure_assets = [
+  "Archive Storage",
+  "App Configuration",
+  "Azure SQL"
+];
+
+const db_assets = [
+  "MongoDB",
+  "MySQL",
+  "Firebase"
 ];
 
 function getStyles(name, interfaces, theme) {
@@ -69,7 +84,9 @@ function getStyles(name, interfaces, theme) {
 export default function Main() {
   const theme = useTheme();
   const [interfaces, setInterfaces] = React.useState([]);
-  // const classes = useStyles();
+  const [awsCloud, setAwsCloud] = React.useState([]);
+  const [azureCloud, setAzureCloud] = React.useState([]);
+  const [db, setDB] = React.useState([]);
 
 
   const handleChange = (event) => {
@@ -83,38 +100,65 @@ export default function Main() {
 
   };
 
+  const awsAssetChange = (event) => {
+    const {
+      target: { value },
+    } = event;
+    setAwsCloud(
+      typeof value === "string" ? value.split(", ") : value
+    )
+  }
+
+  const azureAssetChange = (event) => {
+    const {
+      target: { value },
+    } = event;
+    setAzureCloud(
+      typeof value === "string" ? value.split(", ") : value
+    )
+  }
+
+  const DBAssetChange = (event) => {
+    const {
+      target: { value },
+    } = event;
+    setDB(
+      typeof value === "string" ? value.split(", ") : value
+    )
+  }
+
   const [openDialog, setOpenDialog] = React.useState(false);
   const [openDialog1, setOpenDialog1] = React.useState(false);
   const [successDialog, setSuccessDialog] = React.useState(false);
   const [drop, setDrop] = React.useState(false);
   const [data, setData] = React.useState(null);
 
+  const [value, setValue] = React.useState([]);
+
+  // const handleCloudValue = (event) => {
+  //   setValue(value === event.target.value ? '' : event.target.value);
+  //   // setChecked(true)
+  //   console.log("radio value is", event.target.value)
+  // };
+
+  const handleCloudValue = (event, option) => {
+    const newSelected = [...value];
+    if (value.includes(option.id)) {
+      newSelected.splice(value.indexOf(option.id), 1);
+    } else {
+      newSelected.push(option.id);
+    }
+    console.log("Values is ", newSelected)
+    setValue(newSelected);
+  };
 
 
 
-  // useEffect(() => {
-  //   return () => {
-  //     Axios.get('http://localhost:8080/checkStatus')
-  //       .then(
-  //         res => {
-
-  //           console.log(res.data)
-  //           if (res.data === "Completed") {
-  //             setSuccessDialog(true)
-  //             console.log("completed")
-  //             setDrop(false)
-  //             alert("completed")
-  //           }
-  //           else if (res.data === "processing") {
-  //             setDrop(!drop)
-  //             console.log("processed")
-  //           }
-  //           setData(res.data)
-
-  //           console.log(sessionStorage.getItem("sessionId"))
-  //         })
-  //   }
-  // }, [data])
+  const options = [
+    { id: 'AWS', label: 'AWS Cloud' },
+    { id: 'AZURE', label: 'Azure Cloud' },
+    { id: 'DATABASES', label: 'Databases' },
+  ];
 
   const successDefault = {
     loop: true,
@@ -135,11 +179,18 @@ export default function Main() {
   };
 
   function handleOpen() {
-    Axios.post("http://localhost:8080/interfaces", {
-      "interfaces": interfaces,
+    Axios.post("http://localhost:8080/addData", {
+      "interfaces": (interfaces.length > 0) ? interfaces : "",
+      "awsAssets": (awsCloud.length > 0) ? awsCloud : "",
+      "azureAssets": (azureCloud.length > 0) ? azureCloud : "",
+      "DBAssets": (db.length > 0) ? db : "",
       "sessionId": random.getRandom(20, 'TARA', '@', 'front')
     }, { headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } })
-    sessionStorage.setItem("sessionId", "Hello")
+
+    // Axios.post("http://localhost:8080/awsCloud", {
+    //   "awsAssets": awsCloud,
+    //   "sessionId": random.getRandom(20, 'TARA', '@', 'front')
+    // }, { headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } })
 
     setDrop(true)
 
@@ -157,7 +208,6 @@ export default function Main() {
         res => {
           if (res.data === "Completed") {
             setSuccessDialog(true)
-            console.log("completed")
             setDrop(false)
             clearInterval(timer)
             setData(res.data)
@@ -175,6 +225,11 @@ export default function Main() {
 
   const handleCloseDialog1 = () => {
     setOpenDialog1(false);
+    setInterfaces([]);
+    setAwsCloud([]);
+    setAzureCloud([]);
+    setDB([]);
+    setValue([]);
   };
 
   const handleClickOpenDialog1 = () => {
@@ -184,54 +239,178 @@ export default function Main() {
   const handleCloseSuccessDialog = () => {
     setSuccessDialog(false);
     setInterfaces([]);
+    setAwsCloud([]);
+    setAzureCloud([]);
+    setDB([]);
+    setValue([]);
   }
 
   return (
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
       <AppBar position="fixed">
         <Toolbar>
-          <h3 style={{ float: "left" }}>TARA Master Sheet Creator</h3>
-           
-          
+          <img src={TALE} style={{ height: "50px", maxWidth: "50%", float: "right", marginRight: "10px", marginTop: "5px" }} />
+          <h3 style={{ float: "left" }}>Si-TARA</h3>
+
+
         </Toolbar>
       </AppBar>
 
-      <Stack direction="column" alignItems="center">
-        <FormControl sx={{ m: 1, width: 300 }}>
-          <InputLabel id="demo-multiple-name-label">
-            Select Interfaces and Protocols
-          </InputLabel>
-          <Select
-            style={{ zIndex: 2 }}
-            labelId="demo-multiple-name-label"
-            id="demo-multiple-name"
-            multiple
-            value={interfaces}
-            onChange={handleChange}
-            input={<OutlinedInput label="Select Interfaces and Protocols" />}
-            MenuProps={MenuProps}
-          >
-            {items.map((name) => (
-              <MenuItem
-                key={name}
-                value={name}
-                style={getStyles(name, interfaces, theme)}
-              >
-                {name}
-              </MenuItem>
-            ))}
-          </Select>
+      <Stack direction="row" alignItems="center">
+        <Stack direction="column" alignItems="center">
+          <FormControl sx={{ m: 1, width: 300 }}>
+            <InputLabel id="demo-multiple-name-label">
+              Select Interfaces and Protocols
+            </InputLabel>
+            <Select
+              style={{ zIndex: 2 }}
+              labelId="demo-multiple-name-label"
+              id="demo-multiple-name"
+              multiple
+              value={interfaces}
+              onChange={handleChange}
+              input={<OutlinedInput label="Select Interfaces and Protocols" />}
+              renderValue={(selected) => selected.join(', ')}
+              MenuProps={MenuProps}
+            >
+              {items.map((name) => (
+                <MenuItem
+                  key={name}
+                  value={name}
+                  style={getStyles(name, interfaces, theme)}
+                >
+                  {/* <Checkbox checked={interfaces.indexOf(name) > -1} /> */}
+                  <ListItemText primary={name} />
+                </MenuItem>
+              ))}
+            </Select>
 
-        </FormControl>
-        <Button
-          disabled={interfaces.length <= 0}
-          variant="contained"
-          onClick={() => { handleClickOpenDialog() }}
-        >
-          Generate TARA
-        </Button>
+          </FormControl>
+
+          <Button
+            disabled={(interfaces.length <= 0) && (awsCloud.length <= 0) && (azureCloud.length <= 0) && (db.length <= 0)}
+            variant="contained"
+            onClick={() => { handleClickOpenDialog() }}
+          >
+            Generate TARA
+          </Button>
+
+        </Stack>
+
+        {/* {data ? data : "loading"} */}
+
+        <Stack direction={"column"}>
+          <div
+
+          >
+            {value.map(option => {
+              if (option === "AWS") {
+                return (
+                  <div>
+                    <FormControl sx={{ m: 1, width: 300, marginTop: "12px" }}>
+                      <InputLabel id="demo-multiple-name-label">
+                        Select AWS Assets
+                      </InputLabel>
+                      <Select
+                        style={{ zIndex: 2 }}
+                        labelId="demo-multiple-name-label"
+                        id="demo-multiple-name"
+                        multiple
+                        value={awsCloud}
+                        onChange={awsAssetChange}
+                        input={<OutlinedInput label="Select AWS Assets" />}
+                        MenuProps={MenuProps}
+                      >
+                        {aws_assets.map((name) => (
+                          <MenuItem
+                            key={name}
+                            value={name}
+                            style={getStyles(name, awsCloud, theme)}
+                          >
+                            {name}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </div>
+                );
+              }
+              if (option === "AZURE") {
+                return (
+                  <div>
+                    <FormControl sx={{ m: 1, width: 300, marginTop: "12px" }}>
+                      <InputLabel id="demo-multiple-name-label">
+                        Select Azure Assets
+                      </InputLabel>
+                      <Select
+                        style={{ zIndex: 2 }}
+                        labelId="demo-multiple-name-label"
+                        id="demo-multiple-name"
+                        multiple
+                        value={azureCloud}
+                        onChange={azureAssetChange}
+                        input={<OutlinedInput label="Select Azure Assets" />}
+                        MenuProps={MenuProps}
+                      >
+                        {azure_assets.map((name) => (
+                          <MenuItem
+                            key={name}
+                            value={name}
+                            style={getStyles(name, azureCloud, theme)}
+                          >
+                            {name}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </div>
+                );
+              }
+              if (option === "DATABASES") {
+                return (
+                  <div>
+                    <FormControl sx={{ m: 1, width: 300, marginTop: "12px" }}>
+                      <InputLabel id="demo-multiple-name-label">
+                        Select Databases
+                      </InputLabel>
+                      <Select
+                        style={{ zIndex: 2 }}
+                        labelId="demo-multiple-name-label"
+                        id="demo-multiple-name"
+                        multiple
+                        value={db}
+                        onChange={DBAssetChange}
+                        input={<OutlinedInput label="Select Databases" />}
+                        MenuProps={MenuProps}
+                      >
+                        {db_assets.map((name) => (
+                          <MenuItem
+                            key={name}
+                            value={name}
+                            style={getStyles(name, db, theme)}
+                          >
+                            {name}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </div>
+                );
+              }
+            })}
+
+            <div>
+              <Stack direction={"row"}>
+                {options.map((option) => (
+                  <FormControlLabel key={option.id} value={option.id} control={<Checkbox />} label={option.label} checked={value.includes(option.id)} onChange={event => handleCloudValue(event, option)} />
+                ))}
+              </Stack>
+            </div>
+          </div>
+
+        </Stack>
+
       </Stack>
-      {/* {data ? data : "loading"} */}
 
       <Dialog
         open={openDialog}
@@ -246,7 +425,11 @@ export default function Main() {
         </DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
-            <div>{interfaces.join(", ")}</div>
+            {interfaces.length >= 0 ? <div>{interfaces.join(", ")}</div> : ""}
+            {awsCloud.length >= 0 ? <div>{awsCloud.join(", ")}</div> : ""}
+            {azureCloud.length >= 0 ? <div>{azureCloud.join(", ")}</div> : ""}
+            {db.length >= 0 ? <div>{db.join(", ")}</div> : ""}
+            {/* <div>{awsCloud.length >= 0 ? awsCloud.join(", ") : azureCloud.join(", ")}</div> */}
             <div>
               <strong>Do You Wish to Continue?</strong>
             </div>
@@ -257,6 +440,9 @@ export default function Main() {
             onClick={() => {
               handleCloseDialog();
               setInterfaces([]);
+              setAwsCloud([]);
+              setAzureCloud([]);
+              setDB([]);
               handleClickOpenDialog1();
             }}
           >
@@ -307,7 +493,8 @@ export default function Main() {
         disableEscapeKeyDown
       >
         <DialogTitle id="alert-dialog-title">
-          {data === "Completed" ? `Tara Sheet Created for ${interfaces.join(", ")}` : `Tara Sheet Cannot be Created for ${interfaces.join(", ")}`}
+          {((awsCloud.length > 0 || interfaces.length > 0 || db.length > 0 || azureCloud.length > 0) && data === "Completed") ? <div>Tara Sheet Created for {awsCloud.join(", ")+","} {azureCloud.join(", ")+","} {interfaces.join(", ")} {db.join(", ")}</div> : ""}
+
         </DialogTitle>
         <DialogContent>
           {data === "Completed" ? <Lottie options={successDefault} height={200} width={200} /> : <Lottie options={failedDefault} height={200} width={200} />}
@@ -316,8 +503,6 @@ export default function Main() {
           <Button
             onClick={() => {
               handleCloseSuccessDialog();
-              setInterfaces([]);
-              // resetFileInput();
             }}
           >
             OK
